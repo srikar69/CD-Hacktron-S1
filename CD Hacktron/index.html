@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="An interactive dangling-else grammar analysis lab." />
+    <title>GrammarFix — Dangling Else Resolver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-glow glow-one"></div>
+    <div class="page-glow glow-two"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="GrammarFix home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>Grammar<span>Fix</span></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a class="active" href="#analyzer">Analyzer</a>
+        <a href="#grammar">Grammar</a>
+        <a href="#playground">Test cases</a>
+      </nav>
+      <div class="top-actions">
+        <span class="lesson-pill"><span></span> Parsing lab · 04</span>
+        <button class="icon-button" id="themeButton" type="button" aria-label="Toggle contrast theme">◐</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="eyebrow"><span class="pulse-dot"></span> Unit II · Parsing (Top-Down)</div>
+        <div class="hero-copy">
+          <div>
+            <h1 id="hero-title">Resolve the <em>dangling else.</em></h1>
+            <p>See exactly why a nested <code>if</code> can have two meanings, then watch the matched/unmatched grammar make the choice unambiguous.</p>
+          </div>
+          <div class="hero-badge">
+            <span class="badge-icon">⌘</span>
+            <span><strong>Beginner friendly</strong><small>Visual parsing walkthrough</small></span>
+          </div>
+        </div>
+        <div class="hero-rule"></div>
+        <div class="hero-stats" aria-label="Lab capabilities">
+          <span><b id="statIfs">2</b> nested conditions</span>
+          <span><b id="statElses">1</b> else clause</span>
+          <span><b id="statParses">2</b> valid parse trees</span>
+        </div>
+      </section>
+
+      <section class="workspace" id="analyzer" aria-label="Dangling else analyzer">
+        <aside class="lab-rail">
+          <div class="rail-intro">
+            <span class="section-kicker">Your route</span>
+            <h2>Analysis lab</h2>
+          </div>
+          <ol class="steps" aria-label="Analysis steps">
+            <li class="complete"><span>01</span><div><strong>Enter program</strong><small>Nested conditionals</small></div></li>
+            <li class="current"><span>02</span><div><strong>Find ambiguity</strong><small>Compare derivations</small></div></li>
+            <li><span>03</span><div><strong>Rewrite grammar</strong><small>Match every else</small></div></li>
+            <li><span>04</span><div><strong>Verify meaning</strong><small>One resolved tree</small></div></li>
+          </ol>
+          <div class="rail-note">
+            <span>✦</span>
+            <p><strong>Key rule</strong>An <code>else</code> binds to the nearest unmatched <code>if</code>.</p>
+          </div>
+        </aside>
+
+        <div class="analysis-panel">
+          <section class="input-card">
+            <div class="card-heading">
+              <div>
+                <span class="section-kicker">Step 01</span>
+                <h2>Try a nested conditional</h2>
+              </div>
+              <button id="formatButton" class="text-button" type="button"><span>✦</span> Format input</button>
+            </div>
+            <p class="muted">Use <code>if (condition)</code>, an action ending in <code>;</code>, and optional <code>else</code> clauses.</p>
+            <div class="editor-shell">
+              <div class="line-numbers" id="lineNumbers" aria-hidden="true">1<br>2<br>3<br>4</div>
+              <textarea id="programInput" spellcheck="false" aria-label="Nested conditional program">if (loggedIn)
+  if (isAdmin)
+    showDashboard();
+  else
+    showRequestAccess();</textarea>
+              <span class="editor-language">PSEUDO</span>
+            </div>
+            <div class="input-actions">
+              <div class="syntax-status" id="syntaxStatus"><span></span> Ready to analyze</div>
+              <button class="analyze-button" id="analyzeButton" type="button">Analyze program <span>→</span></button>
+            </div>
+          </section>
+
+          <section class="result-strip" id="resultStrip" aria-live="polite">
+            <div class="result-icon">!</div>
+            <div><strong id="resultTitle">Ambiguity detected</strong><p id="resultText">This program produces two valid parse trees.</p></div>
+            <div class="parse-counter"><span id="parseCount">2</span><small>parse trees</small></div>
+          </section>
+
+          <section class="tree-section" aria-labelledby="trees-title">
+            <div class="section-header">
+              <div>
+                <span class="section-kicker">Step 02</span>
+                <h2 id="trees-title">Two possible interpretations</h2>
+              </div>
+              <p>Same tokens. Different <code>else</code> attachment.</p>
+            </div>
+            <div class="tree-grid" id="treeGrid"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="grammar-section" id="grammar" aria-labelledby="grammar-title">
+        <div class="grammar-intro">
+          <span class="section-kicker">Step 03 · The fix</span>
+          <h2 id="grammar-title">Separate matched and unmatched statements.</h2>
+          <p>The rewrite encodes the nearest-unmatched-<code>if</code> rule directly in the grammar. Every <code>else</code> must now complete a matching <code>if</code>.</p>
+          <button id="showDerivation" class="outline-button" type="button">Show resolution path <span>↓</span></button>
+        </div>
+        <div class="grammar-cards">
+          <article class="grammar-card old-grammar">
+            <div class="grammar-label"><span></span> Ambiguous grammar</div>
+            <pre>S → <b>if</b> (C) S
+  | <b>if</b> (C) S <b>else</b> S
+  | action</pre>
+            <p>Both productions can consume the same <code>else</code>.</p>
+          </article>
+          <div class="grammar-arrow" aria-hidden="true">→</div>
+          <article class="grammar-card fixed-grammar">
+            <div class="grammar-label"><span></span> Unambiguous grammar</div>
+            <pre>S         → M | U
+M (matched) → <b>if</b> (C) M <b>else</b> M | action
+U (open)    → <b>if</b> (C) S
+            | <b>if</b> (C) M <b>else</b> U</pre>
+            <p>Only an <em>unmatched</em> statement may still wait for an <code>else</code>.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="resolution-section" id="resolution" aria-labelledby="resolution-title">
+        <div class="section-header">
+          <div>
+            <span class="section-kicker">Step 04</span>
+            <h2 id="resolution-title">One rule. One resolved meaning.</h2>
+          </div>
+          <div class="rule-chip"><span>✓</span> nearest unmatched <code>if</code></div>
+        </div>
+        <div class="resolution-layout">
+          <article class="resolved-card">
+            <div class="resolved-head"><span>Resolved parse tree</span><span class="resolved-tag">UNAMBIGUOUS</span></div>
+            <div class="resolved-tree" id="resolvedTree"></div>
+          </article>
+          <article class="explanation-card" id="derivationCard">
+            <div class="explanation-number">01</div>
+            <div><h3>Read from the inside out</h3><p id="explanationText">The inner <code>if (isAdmin)</code> is still unmatched when the <code>else</code> appears, so it receives the clause first.</p></div>
+            <div class="resolution-list" id="resolutionList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="playground-section" id="playground" aria-labelledby="playground-title">
+        <div class="playground-head">
+          <div>
+            <span class="section-kicker">Bonus challenge</span>
+            <h2 id="playground-title">Build your own edge case.</h2>
+          </div>
+          <p>Try the ready-made cases or generate a deeper nested chain.</p>
+        </div>
+        <div class="playground-grid">
+          <div class="preset-list" id="presetList" aria-label="Preset test cases"></div>
+          <div class="builder-card">
+            <div class="builder-topline"><span class="builder-icon">⌘</span><div><strong>Case builder</strong><small>Generate a fresh example</small></div></div>
+            <label for="depthRange">Nesting depth <output id="depthOutput">3</output></label>
+            <input id="depthRange" type="range" min="2" max="5" value="3" />
+            <div class="builder-controls">
+              <label for="elseSelect">Else placement</label>
+              <select id="elseSelect">
+                <option value="one">One dangling else</option>
+                <option value="all-but-one">All but outermost</option>
+                <option value="all">Every if matched</option>
+              </select>
+            </div>
+            <button id="generateButton" class="generate-button" type="button">Generate and analyze <span>→</span></button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span class="brand-mark small" aria-hidden="true"><i></i><i></i><i></i></span>
+      GrammarFix · A visual companion for context-free grammars
+      <a href="#top">Back to top ↑</a>
+    </footer>
+    <div class="toast" id="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
